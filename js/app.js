@@ -1,70 +1,67 @@
-document.getElementById('loan-form').addEventListener('submit', function(e){
 
-    document.getElementById('loader').style.display = 'block';
-    document.getElementById('result').style.display = 'none';
+let min = 1,
+    max = 10,
+    winningNum = getRandomNum(min, max),
+    guessleft = 3;
 
-    setTimeout(calculateResult, 2000);
-    e.preventDefault();
-    
+const game = document.querySelector('#game'),
+      gameBtn = document.querySelector('#btn-game'),
+      minNum = document.querySelector('.min-num'),
+      maxNum = document.querySelector('.max-num'),
+      message = document.querySelector('.message');
+      inputValue = document.querySelector('#input-value');
+
+minNum.textContent = min;
+maxNum.textContent = max;
+
+
+// Game Reload
+game.addEventListener('mousedown',function(e){    
+    if(e.target.classList.contains('play-again')){
+        
+        window.location.reload();
+    }
 });
 
+// load Event Listner
+gameBtn.addEventListener('click', function(){
+    const guess = parseInt(inputValue.value);
+    if(isNaN(guess) || guess < min || guess > max){
+        errorMessage(`plase enter a no between ${min} and ${max}`, 'red');
+    }
+    else if(guess === winningNum){
+        gameOver(`${winningNum} is correct! YOU WIN`, 'green');
+        inputValue.disabled = true;
+        inputValue.style.border = '1px solid #000';
+    }
+    else{
+        guessleft -= 1;
+        if(guessleft === 0){
+            gameOver(`Game over you lose the correct no was ${winningNum}`, 'red');
+        }
+        else{
+            errorMessage(`${guess} is guess wrong! ${guessleft} guess left`, 'green');
+        }
+    }
+    inputValue.value = "";
+});
 
-function calculateResult(){
-   
-    // UI Variables
-    const amount = document.getElementById('amount');
-    const interest = document.getElementById('interest');
-    const years = document.getElementById('years');
-    const monthlyPayment = document.getElementById('monthly-payment');
-    const totalPayment = document.getElementById('total-payment');
-    const toatalInterest = document.getElementById('total-interest');
-
-    const principle = parseFloat(amount.value);
-    const calculateInterest = parseFloat(interest.value) / 100 / 12;
-    const calculatePayment = parseFloat(years.value) * 12;
-
-    // Monthly Payment
-    const x = Math.pow(1 + calculateInterest, calculatePayment);
-    const monthly = (principle*x*calculateInterest) / (x-1);
-
-     if(isFinite(monthly)){
-         monthlyPayment.value = monthly.toFixed(2);
-         totalPayment.value = (monthly * calculatePayment).toFixed(2);
-         toatalInterest.value = ((monthly * calculatePayment) - principle).toFixed(2);
-         document.getElementById('loader').style.display = 'none';
-         document.getElementById('result').style.display = 'block';
-         
-     }
-     else{
-
-         // Error Label function call
-         erroMessage('Enter the number');       
-     }
-     amount.value = '';
-     interest.value = '';
-     years.value = '';
+// game over
+function gameOver(msg, color){
+    message.style.color = color;
+    message.textContent = msg;
+    inputValue.disabled = true;
+    gameBtn.textContent = 'Play Again';
+    gameBtn.className += ' play-again';
 }
 
-// Show Error Message
-function erroMessage(error){
-
-    
-    document.getElementById('loader').style.display = 'none';
-
-    const carcardBody = document.querySelector('.card-body');
-    const heading = document.querySelector('.heading');
-
-    const errorLabel = document.createElement('div');
-    errorLabel.className = 'alert alert-info';
-    errorLabel.appendChild(document.createTextNode(error));
-    carcardBody.insertBefore(errorLabel, heading);
-
-    // Set Time out method
-    setTimeout(errorDisable, 3000);
-
+// Error Message
+function errorMessage(msg, color){
+    message.style.color = color;
+    message.textContent = msg;
 }
 
-// Error Disable
-function errorDisable(){
-    document.querySelector('.alert').remove();
+// Get Random Num
+function getRandomNum(min, max){
+    return ((Math.floor(Math.random() * max + min)));
 }
